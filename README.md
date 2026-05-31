@@ -19,6 +19,8 @@ Java: 21
 Gradle: 8.5
 ```
 
+<h1 align="center">FUCK K*TLIN</h1>
+
 ---
 
 <p align="center">

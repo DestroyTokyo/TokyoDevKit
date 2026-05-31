@@ -1,0 +1,23 @@
+<ivy-module version="2.0">
+  <info organisation="bundledPlugin" module="org.intellij.groovy" revision="IC-241.19416.15"/>
+  <configurations>
+    <conf name="default" visibility="public"/>
+  </configurations>
+  <publications>
+    <artifact name="groovy-constants-rt" ext="jar" conf="default" url="plugins/Groovy/lib"/>
+    <artifact name="groovy-jps" ext="jar" conf="default" url="plugins/Groovy/lib"/>
+    <artifact name="groovy-rt-class-loader" ext="jar" conf="default" url="plugins/Groovy/lib"/>
+    <artifact name="groovy-rt" ext="jar" conf="default" url="plugins/Groovy/lib"/>
+    <artifact name="groovy-spock-rt" ext="jar" conf="default" url="plugins/Groovy/lib"/>
+    <artifact name="Groovy" ext="jar" conf="default" url="plugins/Groovy/lib"/>
+  </publications>
+  <dependencies>
+    <dependency org="bundledPlugin" name="com.intellij.copyright" rev="IC-241.19416.15"/>
+    <dependency org="bundledPlugin" name="org.intellij.intelliLang" rev="IC-241.19416.15"/>
+    <dependency org="bundledPlugin" name="JUnit" rev="IC-241.19416.15"/>
+    <dependency org="bundledPlugin" name="com.intellij.properties" rev="IC-241.19416.15"/>
+    <dependency org="bundledPlugin" name="com.intellij.java" rev="IC-241.19416.15"/>
+    <dependency org="bundledPlugin" name="Git4Idea" rev="IC-241.19416.15"/>
+    <dependency org="bundledPlugin" name="ByteCodeViewer" rev="IC-241.19416.15"/>
+  </dependencies>
+</ivy-module>

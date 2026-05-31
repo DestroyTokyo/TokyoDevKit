@@ -1,0 +1,12 @@
+<ivy-module version="2.0">
+  <info organisation="bundledPlugin" module="ByteCodeViewer" revision="IC-241.19416.15"/>
+  <configurations>
+    <conf name="default" visibility="public"/>
+  </configurations>
+  <publications>
+    <artifact name="byteCodeViewer" ext="jar" conf="default" url="plugins/java-byteCodeViewer/lib"/>
+  </publications>
+  <dependencies>
+    <dependency org="bundledPlugin" name="com.intellij.java" rev="IC-241.19416.15"/>
+  </dependencies>
+</ivy-module>
