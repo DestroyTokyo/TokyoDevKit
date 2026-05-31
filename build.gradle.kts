@@ -1,14 +1,13 @@
 plugins {
 	id("java")
 	id("org.jetbrains.intellij.platform")
+	kotlin("jvm")
 }
 
-group = "delta.cion.mushoom"
-version = "0.0.1"
+group = "delta.cion.cherry.modkit"
+version = "v0.0.0-dev"
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -28,6 +27,7 @@ dependencies {
 		bundledPlugin("com.intellij.java")
 		bundledPlugin("org.jetbrains.plugins.gradle")
 	}
+	implementation(kotlin("stdlib-jdk8"))
 }
 
 intellijPlatform {
@@ -36,4 +36,7 @@ intellijPlatform {
 			sinceBuild = "241"
 		}
 	}
+}
+kotlin {
+	jvmToolchain(21)
 }

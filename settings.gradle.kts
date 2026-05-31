@@ -7,11 +7,13 @@ pluginManagement {
 	}
 	plugins {
 		id("org.jetbrains.intellij.platform") version "2.2.0"
+		kotlin("jvm") version "2.2.20"
 	}
 }
 
 plugins {
 	id("org.jetbrains.intellij.platform.settings") version "2.2.0"
+	id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
 }
 
-rootProject.name = "Mushroom"
+rootProject.name = "CherryModKit"

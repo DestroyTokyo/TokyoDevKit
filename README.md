@@ -8,7 +8,7 @@
 ---
 
 ```txt
-Gradle plugin for FantasyAxe MC versions
+Gradle ModdingKit for CherryServer plugins
 ```
 
 ---
@@ -23,7 +23,7 @@ Gradle: 8.5
 
 <p align="center">
     <a href="#">
-        <img src="https://img.shields.io/github/last-commit/fantasyaxe/mushroom?display_timestamp=committer&style=flat-square&color=000000"></a>
+        <img src="https://img.shields.io/github/last-commit/CherryServer/CherryModKit?display_timestamp=committer&style=flat-square&color=000000"></a>
     <a href="#">
-        <img src="https://img.shields.io/github/created-at/fantasyaxe/mushroom?style=flat-square&color=000000"></a>
+        <img src="https://img.shields.io/github/created-at/CherryServer/CherryModKit?style=flat-square&color=000000"></a>
 </p>
