@@ -1,48 +1,42 @@
-package delta.cion.cherry.modkit;
+package delta.cion.cherry.modKit;
 
 import com.intellij.ide.util.projectWizard.WizardContext;
 import com.intellij.ide.wizard.*;
-import com.intellij.openapi.util.IconLoader;
+
+import delta.cion.cherry.modKit.init.MinestomSetup;
+import delta.cion.cherry.modKit.util.Constants;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 
 public class CherryModKit implements GeneratorNewProjectWizard {
 
-	private static final String PLUGIN_ID = "cherry_mod_kit";
-	private static final String PLUGIN_NAME = "CherryModKit";
-	private static final String PLUGIN_DESCRIPTION = "Simple IntellijIDEA extension for develop CherryServer plugins";
-
-	private static final Icon PLUGIN_ICON = IconLoader.getIcon("/icons/minestom-logo-small.png", CherryModKit.class);
-
 	@Override
 	public @NotNull String getId() {
-		return PLUGIN_ID;
+		return Constants.PLUGIN_ID;
 	}
 
 	@Override
 	public @NotNull String getName() {
-		return PLUGIN_NAME;
+		return Constants.PLUGIN_NAME;
 	}
 
 	@Override
 	public @NotNull Icon getIcon() {
-		return PLUGIN_ICON;
+		return Constants.PLUGIN_ICON;
 	}
 
 	@Override
 	public @NotNull String getDescription() {
-		return PLUGIN_DESCRIPTION;
+		return Constants.PLUGIN_DESCRIPTION;
 	}
 
 	@Override
 	public @NotNull NewProjectWizardStep createStep(@NotNull WizardContext wizardContext) {
-		RootNewProjectWizardStep rootStep =
-			new RootNewProjectWizardStep(wizardContext);
-		return new NewProjectWizardChainStep<>(rootStep)
+		return new NewProjectWizardChainStep<>(new RootNewProjectWizardStep(wizardContext))
 			.nextStep(NewProjectWizardBaseStep::new)
 			.nextStep(GitNewProjectWizardStep::new)
-			.nextStep(MinestomSetupStep::new);
+			.nextStep(MinestomSetup::new);
 	}
 
 	public static class Builder extends GeneratorNewProjectWizardBuilderAdapter {
@@ -50,7 +44,5 @@ public class CherryModKit implements GeneratorNewProjectWizard {
 			super(new CherryModKit());
 		}
 	}
-
-	private static
 
 }

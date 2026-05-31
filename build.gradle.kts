@@ -4,14 +4,16 @@ plugins {
 	kotlin("jvm")
 }
 
-group = "delta.cion.cherry.modkit"
-version = "v0.0.0-dev"
+val jsonVersion: String by project
+val modKitVersion: String by project
+
+group = "delta.cion.cherry.modKit"
+version = modKitVersion
 
 java {
-}
-
-tasks.withType<JavaCompile>().configureEach {
-	options.release = 21
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
 }
 
 repositories {
@@ -28,6 +30,7 @@ dependencies {
 		bundledPlugin("org.jetbrains.plugins.gradle")
 	}
 	implementation(kotlin("stdlib-jdk8"))
+	implementation("org.json:json:${jsonVersion}")
 }
 
 intellijPlatform {
@@ -37,6 +40,11 @@ intellijPlatform {
 		}
 	}
 }
+
+tasks.withType<JavaCompile>().configureEach {
+	options.release = 21
+}
+
 kotlin {
 	jvmToolchain(21)
 }
