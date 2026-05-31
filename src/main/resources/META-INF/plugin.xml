@@ -1,0 +1,17 @@
+<idea-plugin>
+    <id>delta.cion.mushroom</id>
+    <name>FantasyAXE main plugin</name>
+    <version>0.0.1</version>
+    <vendor>Citory_</vendor>
+    <description><![CDATA[
+    For something MC versions development
+
+    <p><b>NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT</b></p>
+  ]]></description>
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
+    <depends>com.intellij.gradle</depends>
+    <extensions defaultExtensionNs="com.intellij">
+        <moduleBuilder builderClass="delta.cion.mushroom.Mushroom$Builder"/>
+    </extensions>
+</idea-plugin>

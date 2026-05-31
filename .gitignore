@@ -1,0 +1,26 @@
+# ==================== #
+# By: Lmao stupid Cion #
+# ==================== #
+
+# <= Main =>
+.env
+*.iml
+*.iws
+.zed
+.idea
+
+# <= Gradle =>
+build
+.gradle
+gradlew
+gradlew.bat
+gradle/wrapper/gradle-wrapper.jar
+
+# <= Maven =>
+target/
+
+# <= Trash =>
+.intellijPlatform
+
+#   >> Contain
+!.gitattributes
