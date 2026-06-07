@@ -20,7 +20,7 @@ public class JavaClasses {
 			private static final Logger LOGGER = LoggerFactory.getLogger(%s.class);
 
 			public %s() {
-					super("%s");
+				super("%s");
 			}
 
 			@Override

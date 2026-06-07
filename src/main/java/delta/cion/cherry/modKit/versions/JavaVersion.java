@@ -13,36 +13,40 @@ public class JavaVersion {
 
 	public static List<String> getJavaVersions() {
 		JavaSdk javaSdk = JavaSdk.getInstance();
-		List<String> versions = new ArrayList<>();
+		List<String> entries = new ArrayList<>();
 
 		for (Sdk sdk : ProjectJdkTable.getInstance().getAllJdks()) {
 			if (sdk.getSdkType() != javaSdk) continue;
 
-			String version = sdk.getVersionString();
-			if (version == null) continue;
+			String versionString = sdk.getVersionString();
+			if (versionString == null) continue;
 
-			String java = extractJavaMajorVersion(version);
-			if (java == null) continue;
+			String major = extractJavaMajorVersion(versionString);
+			if (major == null) continue;
 
-			int javaVersion = Integer.parseInt(java);
+			int javaVersion = Integer.parseInt(major);
 			if (javaVersion < 21) continue;
 
-			if (versions.contains(java)) continue;
-			versions.add(java);
+			entries.add(major + " (" + sdk.getName() + ")");
 		}
 
-		versions.sort(
-			(a, b) ->
-				Integer.compare(Integer.parseInt(b), Integer.parseInt(a)));
+		entries.sort((a, b) -> {
+			int verA = extractMajorFromDisplay(a);
+			int verB = extractMajorFromDisplay(b);
+			return Integer.compare(verB, verA);
+		});
 
-		if (versions.isEmpty()) return List.of("21");
-		return versions;
+		if (entries.isEmpty()) return List.of("21 (No JDK found)");
+		return entries;
 	}
 
 	private static String extractJavaMajorVersion(String versionString) {
-		Pattern modernPattern = Pattern.compile("^(\\d+)(?:\\..*)?$");
-		Matcher m = modernPattern.matcher(versionString.trim());
-		if (m.find()) return m.group(1);
-		return null;
+		Matcher m = Pattern.compile("^(\\d+)").matcher(versionString.trim());
+		return m.find() ? m.group(1) : null;
+	}
+
+	private static int extractMajorFromDisplay(String display) {
+		Matcher m = Pattern.compile("^(\\d+)").matcher(display);
+		return m.find() ? Integer.parseInt(m.group(1)) : 0;
 	}
 }

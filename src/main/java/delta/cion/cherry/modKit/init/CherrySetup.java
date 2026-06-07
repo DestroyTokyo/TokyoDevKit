@@ -123,17 +123,9 @@ public class CherrySetup extends AbstractNewProjectWizardStep {
 
 		panel.group("Java Versions", true, p -> {
 			addComboRow(p, "Java version:", javaCombo);
-			return Unit.INSTANCE;});
-		panel.group("Gradle Version", true, p -> {
 			addComboRow(p, "Gradle version:", gradleCombo);
-			return Unit.INSTANCE;});
-		panel.group("Cherry Version", true, p -> {
 			addComboRow(p, "Cherry version:", cherryCombo);
-			return Unit.INSTANCE;});
-		panel.group("Shadow Version", true, p -> {
 			addComboRow(p, "Shadow version:", shadowCombo);
-			return Unit.INSTANCE;});
-		panel.group("CherryModKit", true, p -> {
 			p.row("Package", row -> {
 				row.cell(packageField);
 				return Unit.INSTANCE;
