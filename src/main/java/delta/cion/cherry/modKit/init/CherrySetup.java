@@ -127,7 +127,7 @@ public class CherrySetup extends AbstractNewProjectWizardStep {
 			addComboRow(p, "Cherry version:", cherryCombo);
 			addComboRow(p, "Shadow version:", shadowCombo);
 			p.row("Package", row -> {
-				row.cell(packageField);
+				row.cell(packageField).resizableColumn();;
 				return Unit.INSTANCE;
 			});
 			return Unit.INSTANCE;});
