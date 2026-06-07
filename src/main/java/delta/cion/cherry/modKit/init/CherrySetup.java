@@ -15,6 +15,7 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.ui.dsl.builder.Panel;
 import com.intellij.ui.dsl.builder.Row;
+import com.intellij.ui.dsl.builder.RowLayout;
 import delta.cion.cherry.modKit.util.Constants;
 import delta.cion.cherry.modKit.versions.*;
 import kotlin.Unit;
@@ -126,7 +127,9 @@ public class CherrySetup extends AbstractNewProjectWizardStep {
 			addComboRow(p, "Cherry version:", cherryCombo);
 			addComboRow(p, "Shadow version:", shadowCombo);
 			p.row("Project Package:", row -> {
-				row.cell(packageField).resizableColumn();;
+				row.cell(packageField).resizableColumn();
+				row.resizableRow();
+				row.layout(RowLayout.PARENT_GRID);
 				return Unit.INSTANCE;
 			});
 			return Unit.INSTANCE;});
