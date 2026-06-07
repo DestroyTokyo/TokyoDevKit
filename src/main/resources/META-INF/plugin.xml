@@ -6,11 +6,10 @@
     <description><![CDATA[
     Sometimes I think why I creating it.. Bruh...
   ]]></description>
-	<idea-version since-build="241" until-build="999.*" />
-    <depends>com.intellij.modules.platform</depends>
-    <depends>com.intellij.java</depends>
-    <depends>com.intellij.gradle</depends>
-    <extensions defaultExtensionNs="com.intellij">
-        <moduleBuilder builderClass="delta.cion.cherry.modKit.CherryModKit"/>
-    </extensions>
+	<depends>com.intellij.modules.platform</depends>
+	<depends>com.intellij.java</depends>
+	<depends>com.intellij.gradle</depends>
+	<extensions defaultExtensionNs="com.intellij">
+		<moduleBuilder builderClass="delta.cion.cherry.modKit.CherryModKit$Builder"/>
+	</extensions>
 </idea-plugin>

@@ -1,6 +1,7 @@
 plugins {
 	id("java")
 	id("org.jetbrains.intellij.platform")
+	id("com.gradleup.shadow") version "8.3.0"
 	kotlin("jvm")
 }
 
@@ -30,7 +31,7 @@ dependencies {
 		bundledPlugin("org.jetbrains.plugins.gradle")
 	}
 	implementation(kotlin("stdlib-jdk8"))
-	implementation("org.json:json:${jsonVersion}")
+	implementation("org.json:json:$jsonVersion")
 }
 
 intellijPlatform {
@@ -42,8 +43,36 @@ intellijPlatform {
 	}
 }
 
-tasks.withType<JavaCompile>().configureEach {
-	options.release = 21
+tasks {
+	jar {
+		dependsOn(shadowJar)
+		from(zipTree(shadowJar.get().archiveFile))
+		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	}
+
+	withType<JavaCompile>().configureEach {
+		options.release = 21
+	}
+
+	shadowJar {
+		mergeServiceFiles()
+		archiveClassifier.set("")
+		dependencies {
+			include(dependency("org.json:json:.*"))
+		}
+	}
+
+	buildPlugin {
+		dependsOn(shadowJar)
+	}
+
+	build {
+		dependsOn(shadowJar)
+	}
+
+	named("prepareTestSandbox") {
+		dependsOn(shadowJar)
+	}
 }
 
 kotlin {
