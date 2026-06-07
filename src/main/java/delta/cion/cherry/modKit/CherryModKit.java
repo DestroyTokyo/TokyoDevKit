@@ -3,7 +3,7 @@ package delta.cion.cherry.modKit;
 import com.intellij.ide.util.projectWizard.WizardContext;
 import com.intellij.ide.wizard.*;
 
-import delta.cion.cherry.modKit.init.MinestomSetup;
+import delta.cion.cherry.modKit.init.CherrySetup;
 import delta.cion.cherry.modKit.util.Constants;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,7 +36,7 @@ public class CherryModKit implements GeneratorNewProjectWizard {
 		return new NewProjectWizardChainStep<>(new RootNewProjectWizardStep(wizardContext))
 			.nextStep(NewProjectWizardBaseStep::new)
 			.nextStep(GitNewProjectWizardStep::new)
-			.nextStep(MinestomSetup::new);
+			.nextStep(CherrySetup::new);
 	}
 
 	public static class Builder extends GeneratorNewProjectWizardBuilderAdapter {

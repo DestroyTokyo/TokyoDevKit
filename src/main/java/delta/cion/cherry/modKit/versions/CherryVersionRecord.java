@@ -1,6 +1,6 @@
-package delta.cion.cherry.modKit.util;
+package delta.cion.cherry.modKit.versions;
 
-public record CherryVersion(
+public record CherryVersionRecord(
 	String version,
 	String apiJarUrl,
 	String apiJavadocUrl,

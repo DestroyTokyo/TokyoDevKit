@@ -34,5 +34,6 @@ public class Constants {
 	public static final Pattern STABLE_GRADLE_VERSION = Pattern.compile("\\d+\\.\\d+(?:\\.\\d+)?");
 	public static final GradleVersion MIN_GRADLE_VERSION = GradleVersion.version("8.5");
 
+	public static final Pattern GRADLE_VERSIONS_PATTERN = Pattern.compile("\"version\"\\s*:\\s*\"([^\"]+)\"");
 
 }

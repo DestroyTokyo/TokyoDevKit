@@ -1,60 +1,215 @@
 package delta.cion.cherry.modKit.init;
 
+import com.intellij.ide.util.projectWizard.WizardContext;
 import com.intellij.ide.wizard.AbstractNewProjectWizardStep;
 import com.intellij.ide.wizard.NewProjectWizardStep;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.externalSystem.importing.ImportSpecBuilder;
+import com.intellij.openapi.externalSystem.service.execution.ProgressExecutionMode;
+import com.intellij.openapi.externalSystem.util.ExternalSystemUtil;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.projectRoots.JavaSdk;
+import com.intellij.openapi.projectRoots.ProjectJdkTable;
+import com.intellij.openapi.projectRoots.Sdk;
+import com.intellij.openapi.roots.ProjectRootManager;
+import com.intellij.openapi.ui.ComboBox;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.ui.dsl.builder.Panel;
+import com.intellij.ui.dsl.builder.Row;
 import delta.cion.cherry.modKit.util.Constants;
+import delta.cion.cherry.modKit.versions.*;
+
+import kotlin.Unit;
+import org.jetbrains.plugins.gradle.util.GradleConstants;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
 
 public class CherrySetup extends AbstractNewProjectWizardStep {
 
+	private static final List<CherryVersionRecord> _CherryVersionRecords = CherryVersion.parseCherryVersions();
+
 	// UI fields
-	private JComboBox<String> cherryCombo;
-	private JComboBox<String> shadowCombo;
-	private JComboBox<String> gradleCombo;
-	private JComboBox<String> javaCombo;
+	private ComboBox<String> cherryCombo;
+	private ComboBox<String> shadowCombo;
+	private ComboBox<String> gradleCombo;
+	private ComboBox<String> javaCombo;
 	private JTextField packageField;
 
 	// Data
+	private String javaVersion;
 	private String gradleVersion;
 	private String cherryVersion;
 	private String shadowVersion;
-	private String javaVersion;
 	private String packageName;
 
+	private final List<String> javaVersions;
 	private final List<String> gradleVersions;
 	private final List<String> cherryVersions;
 	private final List<String> shadowVersions;
 
 	public CherrySetup(NewProjectWizardStep parent) {
 		super(parent);
-		gradleVersions = currentGradleVersions();
-		cherryVersions = getCherryVersions();
-		shadowVersions = currentMavenVersions(Constants.SHADOW_PLUGIN_METADATA_URL, v -> STABLE_MAVEN_VERSION.matcher(v).matches());
+
+		javaVersions = JavaVersion.getJavaVersions();
+		gradleVersions = GradleVersion.getGradleVersions();
+		cherryVersions = this.getCherryVersions();
+		shadowVersions = ShadowVersions.getShadowVersions();
 
 		// default values
-		gradleVersion = gradleVersions.get(0);
-		cherryVersions = cherryVersions.get(0);
-		shadowVersion = shadowVersions.get(0);
-		junitVersion = junitVersions.get(0);
-		tests = true;
-		packageName = "";
+		javaVersion 	= javaVersions.getFirst();
+		gradleVersion 	= gradleVersions.getFirst();
+		cherryVersion 	= cherryVersions.getFirst();
+		shadowVersion 	= shadowVersions.getFirst();
+		packageName 	= "";
+
+		init();
 	}
 
-	private static List<String> getCherryVersions() {
-		List<String> releases = currentMavenVersions(Constants.CHERRY_VERSIONS_URL, v -> true)
-			.stream().filter(v -> !v.equals(Constants.VERSION_LIST_UNAVAILABLE)).collect(Collectors.toList());
-		List<String> snapshots = currentMavenVersions(Constants.CHERRY_VERSIONS_URL, v -> v.endsWith("-SNAPSHOT"))
-			.stream().filter(v -> !v.equals(Constants.VERSION_LIST_UNAVAILABLE)).collect(Collectors.toList());
-		Set<String> all = new LinkedHashSet<>();
-		all.addAll(releases);
-		all.addAll(snapshots);
-		List<String> result = new ArrayList<>(all);
-		return withUnavailableFallback(result);
+	private List<String> getCherryVersions() {
+		List<String> versions = new ArrayList<>(List.of());
+		_CherryVersionRecords.forEach(v -> {
+			versions.add(v.version());});
+		return versions;
 	}
+
+	// Panels
+	private void init() {
+		initCombo(javaCombo,   javaVersions,   v -> javaVersion   = v);
+		initCombo(gradleCombo, gradleVersions, v -> gradleVersion = v);
+		initCombo(cherryCombo, cherryVersions, v -> cherryVersion = v);
+		initCombo(shadowCombo, shadowVersions, v -> shadowVersion = v);
+
+		packageField = new JTextField();
+		packageField.setColumns(30);
+	}
+
+	private void initCombo(ComboBox<String> combo, List<String> items, java.util.function.Consumer<String> onSelected) {
+		combo.setModel(new DefaultComboBoxModel<>(items.toArray(new String[0])));
+		if (!items.isEmpty()) combo.setSelectedItem(items.getFirst());
+		combo.addActionListener(e -> {
+			String selected = (String) combo.getSelectedItem();
+			if (selected != null) onSelected.accept(selected);
+		});
+	}
+
+	private void addComboRow(Panel p, String label, ComboBox<String> combo) {
+		p.row(label, (Row row) -> {
+			row.cell(combo);
+			return Unit.INSTANCE;
+		});
+	}
+
+	public void setupUI(Panel panel) {
+		panel.group("Java Versions", true,
+			p -> { addComboRow(p, "Java version:", javaCombo); return Unit.INSTANCE; });
+		panel.group("Gradle Version", true,
+			p -> { addComboRow(p, "Gradle version:", gradleCombo); return Unit.INSTANCE; });
+		panel.group("Cherry Version", true,
+			p -> { addComboRow(p, "Cherry version:", cherryCombo); return Unit.INSTANCE; });
+		panel.group("Shadow Version", true,
+			p -> {addComboRow(p, "Shadow version:", shadowCombo); return Unit.INSTANCE; });
+
+		panel.group("CherryModKit", true, p -> {
+			p.row("Package", row -> {
+				row.cell(packageField);
+				return Unit.INSTANCE;
+			});
+			return Unit.INSTANCE;
+		});
+
+		packageField.getDocument().addDocumentListener(new DocumentListener() {
+			public void insertUpdate(DocumentEvent e) { updatePackageName(); }
+			public void removeUpdate(DocumentEvent e) { updatePackageName(); }
+			public void changedUpdate(DocumentEvent e) { updatePackageName(); }
+			private void updatePackageName() {
+				packageName = packageField.getText().trim();
+			}
+		});
+	}
+
+	private void writeText(Path path, String content) throws IOException {
+		Files.createDirectories(path.getParent());
+		Files.writeString(path, content);
+	}
+
+	@Override
+	public void setupProject(Project project) {
+		WizardContext context = this.getContext();
+
+		String rootPath = project.getBasePath();
+		if (rootPath == null || rootPath.isEmpty())
+			throw new IllegalStateException("No path");
+
+		Path root = Path.of(rootPath);
+		String pkg = packageName.trim();
+
+		if (!Constants.JAVA_PACKAGE_NAME.matcher(pkg).matches())
+			throw new IllegalArgumentException("Java package is required");
+
+		String packagePath = pkg.replace('.', '/');
+
+		try {
+			Files.createDirectories(root);
+			writeText(root.resolve("settings.gradle.kts"),
+				BaseFiles.getSettingsGradle(project.getName()));
+			writeText(root.resolve("build.gradle.kts"),
+				BaseFiles.getBuildGradle(shadowVersion, pkg, "0.0.0", javaVersion, cherryVersion));
+			writeText(root.resolve("gradle/wrapper/gradle-wrapper.properties"),
+				BaseFiles.getWrapperProperties(gradleVersion));
+			writeText(root.resolve(".gitignore"),
+				BaseFiles.getGitIgnore());
+
+			String mainClassPath = "src/main/java/%s/%s.java".formatted(packagePath, project.getName());
+			writeText(root.resolve(mainClassPath), JavaClasses.getMainClass(pkg, project.getName()));
+
+			String pluginProperties = "src/main/resources/plugin.properties";
+			writeText(root.resolve(pluginProperties), BaseFiles.getPluginProperties(pkg, project.getName()));
+
+			Objects.requireNonNull(LocalFileSystem.getInstance()
+					.refreshAndFindFileByNioFile(root))
+					.refresh(false, true);
+
+			runAfterOpened(project, openedProject -> {
+				setProjectSdk(openedProject);
+				ImportSpecBuilder specBuilder = new ImportSpecBuilder(openedProject, GradleConstants.SYSTEM_ID)
+					.use(ProgressExecutionMode.IN_BACKGROUND_ASYNC);
+				ExternalSystemUtil.refreshProject(root.toString(), specBuilder);
+			});
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void runAfterOpened(Project project, java.util.function.Consumer<Project> action) {
+		ApplicationManager.getApplication().invokeLater(() -> action.accept(project));
+	}
+
+	private void setProjectSdk(Project project) {
+		Sdk sdk = configuredJava21Sdk();
+		if (sdk == null) return;
+		ApplicationManager.getApplication().invokeLater(() -> {
+			if (!project.isDisposed()) {
+				ApplicationManager.getApplication().runWriteAction(() -> {
+					ProjectRootManager.getInstance(project).setProjectSdk(sdk);
+				});
+			}
+		});
+	}
+
+	private Sdk configuredJava21Sdk() {
+		JavaSdk javaSdk = JavaSdk.getInstance();
+		for (Sdk sdk : ProjectJdkTable.getInstance().getAllJdks()) {
+			if (sdk.getSdkType() == javaSdk &&
+				Constants.JAVA_21_VERSION.matcher(sdk.getVersionString() !=
+					null ? sdk.getVersionString() : "").find()) return sdk;
+		}
+		return null;
+	}
+
 }

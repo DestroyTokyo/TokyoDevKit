@@ -1,5 +1,6 @@
-package delta.cion.cherry.modKit.util;
+package delta.cion.cherry.modKit.versions;
 
+import delta.cion.cherry.modKit.util.Constants;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -16,12 +17,12 @@ import java.util.regex.Pattern;
  * Parsing of CherryApi versions.
  * <br>Releases url located in Constants class
  */
-public class GitHubParser {
+public class CherryVersion {
 
 	private static final String GITHUB_URL = Constants.CHERRY_VERSIONS_URL;
-	private static final ArrayList<CherryVersion> VERSIONS = new ArrayList<>();
+	private static final ArrayList<CherryVersionRecord> VERSIONS = new ArrayList<>();
 
-	public static List<CherryVersion> parseCherryVersions() {
+	public static List<CherryVersionRecord> parseCherryVersions() {
 		try {
 			JSONArray cherryReleases = getAllVersions();
 			if (cherryReleases != null)
@@ -68,8 +69,8 @@ public class GitHubParser {
 		return matcher.find() ? matcher.group(1) : null;
 	}
 
-	private static List<CherryVersion> parseReleases(JSONArray releases) {
-		var versions = new ArrayList<CherryVersion>();
+	private static List<CherryVersionRecord> parseReleases(JSONArray releases) {
+		var versions = new ArrayList<CherryVersionRecord>();
 
 		for (int i = 0; i < releases.length(); i++) {
 			JSONObject release = releases.getJSONObject(i);
@@ -95,7 +96,7 @@ public class GitHubParser {
 			if (apiJar.isBlank() || javadocJar.isBlank() || sourcesJar.isBlank()) continue;
 
 			String version = release.getString("tag_name");
-			versions.add(new CherryVersion(version, apiJar, javadocJar, sourcesJar));
+			versions.add(new CherryVersionRecord(version, apiJar, javadocJar, sourcesJar));
 		}
 		return versions;
 	}
