@@ -1,6 +1,5 @@
 package delta.cion.cherry.modKit.init;
 
-import com.intellij.ide.util.projectWizard.WizardContext;
 import com.intellij.ide.wizard.AbstractNewProjectWizardStep;
 import com.intellij.ide.wizard.NewProjectWizardStep;
 import com.intellij.openapi.application.ApplicationManager;
@@ -121,12 +120,12 @@ public class CherrySetup extends AbstractNewProjectWizardStep {
 			}
 		});
 
-		panel.group("Java Versions", true, p -> {
+		panel.group("Cherry Plugin Setup", true, p -> {
 			addComboRow(p, "Java version:", javaCombo);
 			addComboRow(p, "Gradle version:", gradleCombo);
 			addComboRow(p, "Cherry version:", cherryCombo);
 			addComboRow(p, "Shadow version:", shadowCombo);
-			p.row("Package", row -> {
+			p.row("Project Package:", row -> {
 				row.cell(packageField).resizableColumn();;
 				return Unit.INSTANCE;
 			});
