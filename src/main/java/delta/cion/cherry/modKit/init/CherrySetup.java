@@ -18,7 +18,6 @@ import com.intellij.ui.dsl.builder.Panel;
 import com.intellij.ui.dsl.builder.Row;
 import delta.cion.cherry.modKit.util.Constants;
 import delta.cion.cherry.modKit.versions.*;
-
 import kotlin.Unit;
 import org.jetbrains.plugins.gradle.util.GradleConstants;
 
@@ -58,43 +57,35 @@ public class CherrySetup extends AbstractNewProjectWizardStep {
 
 		javaVersions = JavaVersion.getJavaVersions();
 		gradleVersions = GradleVersion.getGradleVersions();
-		cherryVersions = this.getCherryVersions();
+		cherryVersions = getCherryVersions();
 		shadowVersions = ShadowVersions.getShadowVersions();
 
 		// default values
-		javaVersion 	= javaVersions.getFirst();
-		gradleVersion 	= gradleVersions.getFirst();
-		cherryVersion 	= cherryVersions.getFirst();
-		shadowVersion 	= shadowVersions.getFirst();
-		packageName 	= "";
-
-		init();
+		javaVersion = javaVersions.isEmpty() ? "" : javaVersions.get(0);
+		gradleVersion = gradleVersions.isEmpty() ? "" : gradleVersions.get(0);
+		cherryVersion = cherryVersions.isEmpty() ? "" : cherryVersions.get(0);
+		shadowVersion = shadowVersions.isEmpty() ? "" : shadowVersions.get(0);
+		packageName = "";
 	}
 
 	private List<String> getCherryVersions() {
-		List<String> versions = new ArrayList<>(List.of());
-		_CherryVersionRecords.forEach(v -> {
-			versions.add(v.version());});
+		List<String> versions = new ArrayList<>();
+		for (CherryVersionRecord record : _CherryVersionRecords) {
+			versions.add(record.version());
+		}
 		return versions;
-	}
-
-	// Panels
-	private void init() {
-		initCombo(javaCombo,   javaVersions,   v -> javaVersion   = v);
-		initCombo(gradleCombo, gradleVersions, v -> gradleVersion = v);
-		initCombo(cherryCombo, cherryVersions, v -> cherryVersion = v);
-		initCombo(shadowCombo, shadowVersions, v -> shadowVersion = v);
-
-		packageField = new JTextField();
-		packageField.setColumns(30);
 	}
 
 	private void initCombo(ComboBox<String> combo, List<String> items, java.util.function.Consumer<String> onSelected) {
 		combo.setModel(new DefaultComboBoxModel<>(items.toArray(new String[0])));
-		if (!items.isEmpty()) combo.setSelectedItem(items.getFirst());
+		if (!items.isEmpty()) {
+			combo.setSelectedItem(items.get(0));
+		}
 		combo.addActionListener(e -> {
 			String selected = (String) combo.getSelectedItem();
-			if (selected != null) onSelected.accept(selected);
+			if (selected != null) {
+				onSelected.accept(selected);
+			}
 		});
 	}
 
@@ -105,32 +96,49 @@ public class CherrySetup extends AbstractNewProjectWizardStep {
 		});
 	}
 
+	@Override
 	public void setupUI(Panel panel) {
-		panel.group("Java Versions", true,
-			p -> { addComboRow(p, "Java version:", javaCombo); return Unit.INSTANCE; });
-		panel.group("Gradle Version", true,
-			p -> { addComboRow(p, "Gradle version:", gradleCombo); return Unit.INSTANCE; });
-		panel.group("Cherry Version", true,
-			p -> { addComboRow(p, "Cherry version:", cherryCombo); return Unit.INSTANCE; });
-		panel.group("Shadow Version", true,
-			p -> {addComboRow(p, "Shadow version:", shadowCombo); return Unit.INSTANCE; });
+		javaCombo = new ComboBox<>();
+		gradleCombo = new ComboBox<>();
+		cherryCombo = new ComboBox<>();
+		shadowCombo = new ComboBox<>();
+		packageField = new JTextField();
 
-		panel.group("CherryModKit", true, p -> {
-			p.row("Package", row -> {
-				row.cell(packageField);
-				return Unit.INSTANCE;
-			});
-			return Unit.INSTANCE;
-		});
+		initCombo(javaCombo, javaVersions, v -> javaVersion = v);
+		initCombo(gradleCombo, gradleVersions, v -> gradleVersion = v);
+		initCombo(cherryCombo, cherryVersions, v -> cherryVersion = v);
+		initCombo(shadowCombo, shadowVersions, v -> shadowVersion = v);
 
 		packageField.getDocument().addDocumentListener(new DocumentListener() {
+			@Override
 			public void insertUpdate(DocumentEvent e) { updatePackageName(); }
+			@Override
 			public void removeUpdate(DocumentEvent e) { updatePackageName(); }
+			@Override
 			public void changedUpdate(DocumentEvent e) { updatePackageName(); }
 			private void updatePackageName() {
 				packageName = packageField.getText().trim();
 			}
 		});
+
+		panel.group("Java Versions", true, p -> {
+			addComboRow(p, "Java version:", javaCombo);
+			return Unit.INSTANCE;});
+		panel.group("Gradle Version", true, p -> {
+			addComboRow(p, "Gradle version:", gradleCombo);
+			return Unit.INSTANCE;});
+		panel.group("Cherry Version", true, p -> {
+			addComboRow(p, "Cherry version:", cherryCombo);
+			return Unit.INSTANCE;});
+		panel.group("Shadow Version", true, p -> {
+			addComboRow(p, "Shadow version:", shadowCombo);
+			return Unit.INSTANCE;});
+		panel.group("CherryModKit", true, p -> {
+			p.row("Package", row -> {
+				row.cell(packageField);
+				return Unit.INSTANCE;
+			});
+			return Unit.INSTANCE;});
 	}
 
 	private void writeText(Path path, String content) throws IOException {
@@ -140,8 +148,6 @@ public class CherrySetup extends AbstractNewProjectWizardStep {
 
 	@Override
 	public void setupProject(Project project) {
-		WizardContext context = this.getContext();
-
 		String rootPath = project.getBasePath();
 		if (rootPath == null || rootPath.isEmpty())
 			throw new IllegalStateException("No path");
@@ -173,7 +179,7 @@ public class CherrySetup extends AbstractNewProjectWizardStep {
 
 			Objects.requireNonNull(LocalFileSystem.getInstance()
 					.refreshAndFindFileByNioFile(root))
-					.refresh(false, true);
+				.refresh(false, true);
 
 			runAfterOpened(project, openedProject -> {
 				setProjectSdk(openedProject);
@@ -206,10 +212,10 @@ public class CherrySetup extends AbstractNewProjectWizardStep {
 		JavaSdk javaSdk = JavaSdk.getInstance();
 		for (Sdk sdk : ProjectJdkTable.getInstance().getAllJdks()) {
 			if (sdk.getSdkType() == javaSdk &&
-				Constants.JAVA_21_VERSION.matcher(sdk.getVersionString() !=
-					null ? sdk.getVersionString() : "").find()) return sdk;
+				Constants.JAVA_21_VERSION.matcher(sdk.getVersionString() != null ? sdk.getVersionString() : "").find()) {
+				return sdk;
+			}
 		}
 		return null;
 	}
-
 }
