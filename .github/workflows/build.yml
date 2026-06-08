@@ -22,7 +22,7 @@ jobs:
                     gradle-version: '8.14'
 
             -   name: Build
-                run: ./gradlew build
+                run: gradle build
 
             -   name: Rename JAR to CherryModKit.jar
                 run: |
