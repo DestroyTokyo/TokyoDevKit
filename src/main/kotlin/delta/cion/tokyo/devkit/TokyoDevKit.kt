@@ -22,13 +22,16 @@ import org.gradle.util.GradleVersion
 import org.jetbrains.plugins.gradle.settings.DistributionType
 import org.jetbrains.plugins.gradle.settings.GradleProjectSettings
 import org.jetbrains.plugins.gradle.util.GradleConstants
+import org.json.JSONArray
+import org.json.JSONObject
 import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.util.Locale
-import javax.swing.JComboBox
+import javax.swing.DefaultComboBoxModel
 import javax.swing.Icon
+import javax.swing.JComboBox
 import javax.swing.JTextField
 import kotlin.io.path.createDirectories
 
@@ -119,7 +122,7 @@ private class TokyoSetupStep(parent: NewProjectWizardStep) : AbstractNewProjectW
 	override fun setupProject(project: Project) {
 		val base = baseData ?: error("Project base data is unavailable")
 		val root = Path.of(base.contentEntryPath)
-		val packageName = selectedPackageName.trim()
+		val packageName = packageNameProperty.get().trim()
 		require(packageName.matches(JAVA_PACKAGE_NAME)) { "Java package is required" }
 		val packagePath = packageName.replace('.', '/')
 
@@ -129,9 +132,9 @@ private class TokyoSetupStep(parent: NewProjectWizardStep) : AbstractNewProjectW
 
 		root.createDirectories()
 		writeText(root.resolve("settings.gradle.kts"), settingsGradle(projectName))
-		writeText(root.resolve("build.gradle.kts"), buildGradle(packageName, edition, version, shadowVersion))
+		writeText(root.resolve("build.gradle.kts"), buildGradle(packageName, edition, version, shadowVersionProperty.get()))
 		writeText(root.resolve("gradle.properties"), gradleProperties())
-		writeText(root.resolve("gradle/wrapper/gradle-wrapper.properties"), wrapperProperties(gradleVersion))
+		writeText(root.resolve("gradle/wrapper/gradle-wrapper.properties"), wrapperProperties(gradleVersionProperty.get()))
 		writeText(root.resolve(".gitignore"), gitIgnore())
 		writeText(root.resolve("src/main/java/$packagePath/Main.java"), mainJava(packageName, projectName))
 		writeText(root.resolve("src/main/resources/plugin.properties"), pluginProperties(packageName, projectName))
@@ -196,48 +199,48 @@ private fun validateSelectedVersion(field: JComboBox<String>, name: String, requ
 }
 
 private fun currentGradleVersions(): List<String> {
-	val versions = runCatching {
-		val versionRegex = Regex(""""version"\s*:\s*"([^"]+)"""")
+	val jsonString = runCatching {
 		URI(GRADLE_VERSIONS_URL).toURL().readText()
-			.lineSequence()
-			.joinToString("\n")
-			.split(Regex("""\n}, \{\n"""))
-			.mapNotNull { block ->
-				val version = versionRegex.find(block)?.groupValues?.get(1) ?: return@mapNotNull null
-				val release = listOf("snapshot", "nightly", "releaseNightly", "activeRc", "broken")
-					.all { key -> Regex(""""$key"\s*:\s*false""").containsMatchIn(block) }
-				if (!release || !STABLE_GRADLE_VERSION.matches(version)) return@mapNotNull null
-				version.takeIf { GradleVersion.version(it).baseVersion >= MIN_GRADLE_VERSION }
+	}.getOrNull() ?: return listOf(VERSION_LIST_UNAVAILABLE)
+
+	return runCatching {
+		val jsonArray = JSONArray(jsonString)
+		val versions = mutableListOf<String>()
+		for (i in 0 until jsonArray.length()) {
+			val obj = jsonArray.getJSONObject(i)
+			val version = obj.getString("version")
+			val isRelease = !obj.optBoolean("snapshot", false) &&
+				!obj.optBoolean("nightly", false) &&
+				!obj.optBoolean("releaseNightly", false) &&
+				!obj.optBoolean("activeRc", false) &&
+				!obj.optBoolean("broken", false)
+			if (isRelease && STABLE_GRADLE_VERSION.matches(version)) {
+				val gradleVer = GradleVersion.version(version)
+				if (gradleVer.baseVersion >= MIN_GRADLE_VERSION) {
+					versions.add(version)
+				}
 			}
-			.distinct()
-			.sortedWith(compareByDescending { GradleVersion.version(it) })
-			.toList()
-	}.getOrDefault(emptyList())
-	return versions.withUnavailableFallback()
+		}
+		versions.distinct().sortedWith(compareByDescending { GradleVersion.version(it) })
+	}.getOrDefault(emptyList()).ifEmpty { listOf(VERSION_LIST_UNAVAILABLE) }
 }
 
 private fun loadTokyoEditionsMap(): Map<String, List<String>> {
-	val json = runCatching {
-		URI("https://tokyo.citory.net/jsons/versions.json").toURL().readText()
+	val jsonString = runCatching {
+		URI(TOKYO_METADATA_URL).toURL().readText()
 	}.getOrNull() ?: return emptyMap()
 
-	val pattern = """"(delta/cion/tokyo/[^"]+)"\s*:\s*\[([^\]]*)\]""".toRegex()
-	return pattern.findAll(json)
-		.mapNotNull { match ->
-			val key = match.groupValues[1]
-			val versionsString = match.groupValues[2]
-			val versions = versionsString.split(',').mapNotNull {
-				val trimmed = it.trim()
-				if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
-					trimmed.substring(1, trimmed.length - 1)
-				} else null
-			}
-			if (versions.isNotEmpty()) {
-				val edition = key.substringAfterLast('/')
-				edition to versions.asReversed().distinct()
-			} else null
+	return runCatching {
+		val jsonObject = JSONObject(jsonString)
+		val map = mutableMapOf<String, List<String>>()
+		for (key in jsonObject.keys()) {
+			val versionsArray = jsonObject.getJSONArray(key)
+			val versions = (0 until versionsArray.length()).map { versionsArray.getString(it) }
+			val edition = key.substringAfterLast('/')
+			map[edition] = versions.asReversed().distinct()
 		}
-		.toMap()
+		map
+	}.getOrDefault(emptyMap())
 }
 
 private fun currentMavenVersions(url: String, versionFilter: (String) -> Boolean = { true }): List<String> {
@@ -249,11 +252,8 @@ private fun currentMavenVersions(url: String, versionFilter: (String) -> Boolean
 			.asReversed()
 			.distinct()
 	}.getOrDefault(emptyList())
-	return versions.withUnavailableFallback()
+	return versions.ifEmpty { listOf(VERSION_LIST_UNAVAILABLE) }
 }
-
-private fun List<String>.withUnavailableFallback(): List<String> =
-	ifEmpty { listOf(VERSION_LIST_UNAVAILABLE) }
 
 private fun writeText(path: Path, content: String) {
 	Files.createDirectories(path.parent)
@@ -280,7 +280,7 @@ private fun configuredJava21Sdk(): Sdk? {
 }
 
 private fun settingsGradle(projectName: String): String {
-	return "rootProject.name = "+projectName.escapeKotlinString()
+	return "rootProject.name = " + projectName.escapeKotlinString()
 }
 
 private fun buildGradle(packageName: String, edition: String, tokyoVersion: String, shadowVersion: String): String {
@@ -319,66 +319,66 @@ private fun buildGradle(packageName: String, edition: String, tokyoVersion: Stri
 }
 
 private fun gradleProperties() = """
-	|org.gradle.parallel=true
-	|org.gradle.caching=false
-	|
-	|org.gradle.jvmargs=-Xmx4G
-	|org.gradle.experimental.watching=false
-	""".trimIndent() + "\n"
+    |org.gradle.parallel=true
+    |org.gradle.caching=false
+    |
+    |org.gradle.jvmargs=-Xmx4G
+    |org.gradle.experimental.watching=false
+    """.trimIndent() + "\n"
 
 private fun wrapperProperties(version: String) = """
-	|distributionBase=GRADLE_USER_HOME
-	|distributionPath=wrapper/dists
-	|distributionUrl=https\://services.gradle.org/distributions/gradle-$version-bin.zip
-	|networkTimeout=10000
-	|validateDistributionUrl=true
-	|zipStoreBase=GRADLE_USER_HOME
-	|zipStorePath=wrapper/dists
-	""".trimIndent() + "\n"
+    |distributionBase=GRADLE_USER_HOME
+    |distributionPath=wrapper/dists
+    |distributionUrl=https\://services.gradle.org/distributions/gradle-$version-bin.zip
+    |networkTimeout=10000
+    |validateDistributionUrl=true
+    |zipStoreBase=GRADLE_USER_HOME
+    |zipStorePath=wrapper/dists
+    """.trimIndent() + "\n"
 
 private fun gitIgnore() = """
-	|# ==================== #
-	|# By: Lmao stupid Cion #
-	|# ==================== #
-	|
-	|# <= Main =>
-	|.env
-	|*.iml
-	|*.iws
-	|.zed
-	|.idea
-	|
-	|
-	|# <= Gradle =>
-	|.gradle
-	|build
-	|gradlew
-	|gradlew.bat
-	|
-	|#   >> Contain
-	|!.gitattributes
-	""".trimIndent() + "\n"
+    |# ==================== #
+    |# By: Lmao stupid Cion #
+    |# ==================== #
+    |
+    |# <= Main =>
+    |.env
+    |*.iml
+    |*.iws
+    |.zed
+    |.idea
+    |
+    |
+    |# <= Gradle =>
+    |.gradle
+    |build
+    |gradlew
+    |gradlew.bat
+    |
+    |#   >> Contain
+    |!.gitattributes
+    """.trimIndent() + "\n"
 
 private fun mainJava(packageName: String, projectName: String) = """
-	|package $packageName;
-	|
-	|import delta.cion.tokyo.api.plugin.Plugin;
-	|
-	|public class $projectName extends Plugin {
-	|
-	|	public $projectName(String id, String name, String version) {
-	|		super(id, name, version);
-	|	}
-	|
-	|}""".trimIndent() + "\n"
+    |package $packageName;
+    |
+    |import delta.cion.tokyo.api.plugin.Plugin;
+    |
+    |public class $projectName extends Plugin {
+    |
+    |    public $projectName(String id, String name, String version) {
+    |        super(id, name, version);
+    |    }
+    |
+    |}""".trimIndent() + "\n"
 
 private fun pluginProperties(packageName: String, projectName: String) = """
-	|main-class = $packageName.$projectName
-	|plugin-id = ${projectName.toLowerCase(Locale.UK)}
-	|plugin-name = $projectName
-	|
-	|api-share = false
-	""".trimIndent() + "\n"
+    |main-class = $packageName.$projectName
+    |plugin-id = ${projectName.toLowerCase(Locale.ROOT)}
+    |plugin-name = $projectName
+    |
+    |api-share = false
+    """.trimIndent() + "\n"
 
 private fun String.escapeKotlinString(): String =
 	replace("\\", "\\\\")
