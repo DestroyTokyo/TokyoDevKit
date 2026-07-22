@@ -1,8 +1,8 @@
 <idea-plugin>
-    <id>delta.cion.cherry.modKit</id>
-    <name>CherryModKit</name>
+    <id>delta.cion.tokyo.modKit</id>
+    <name>TokyoDevKit</name>
     <version>0.0.1</version>
-    <vendor>Citory_</vendor>
+    <vendor>Nionim (Citory_)</vendor>
     <description><![CDATA[
     Sometimes I think why I creating it.. Bruh...
   ]]></description>
