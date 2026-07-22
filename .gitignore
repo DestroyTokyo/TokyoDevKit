@@ -8,9 +8,7 @@
 *.iws
 .zed
 .idea
-
-# <= Sometimes it appears =>
-test/
+.intellijPlatform
 
 # <= Gradle =>
 .gradle
@@ -19,9 +17,5 @@ gradlew
 gradlew.bat
 **.jar
 
-# <= Maven =>
-target/
-
 #   >> Contain
-!.intellijPlatform
 !gradle/wrapper/gradle-wrapper.properties

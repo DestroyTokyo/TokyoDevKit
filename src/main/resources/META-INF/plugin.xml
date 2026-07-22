@@ -3,13 +3,14 @@
     <name>TokyoDevKit</name>
     <version>0.0.1</version>
     <vendor>Nionim (Citory_)</vendor>
-    <description><![CDATA[
-    Sometimes I think why I creating it.. Bruh...
-  ]]></description>
-	<depends>com.intellij.modules.platform</depends>
-	<depends>com.intellij.java</depends>
-	<depends>com.intellij.gradle</depends>
-	<extensions defaultExtensionNs="com.intellij">
-		<moduleBuilder builderClass="delta.cion.tokyo.modKit.TokyoDevKit$Builder"/>
-	</extensions>
+    <description>
+		<![CDATA[
+		Sometimes I think why I creating it.. Bruh...
+]]></description>
+<depends>com.intellij.modules.platform</depends>
+<depends>com.intellij.java</depends>
+<depends>com.intellij.gradle</depends>
+<extensions defaultExtensionNs="com.intellij">
+	<moduleBuilder builderClass="delta.cion.tokyo.modKit.TokyoDevKit$Builder"/>
+</extensions>
 </idea-plugin>

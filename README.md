@@ -22,7 +22,7 @@ For developers:
 
 Native IDEA version: 2024.1.7
 Java: 21
-Gradle: 8.14
+Gradle: 9.4.1
 
 Another versions u can see in gradle.properties
 Just dont use libs.toml please.

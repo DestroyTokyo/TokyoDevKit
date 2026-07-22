@@ -1,8 +1,8 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
-	id("java")
-	id("org.jetbrains.intellij.platform")
-	id("com.gradleup.shadow") version "8.3.0"
-	kotlin("jvm")
+	id("org.jetbrains.kotlin.jvm") version "2.3.21"
+	id("org.jetbrains.intellij.platform") version "2.18.1"
 }
 
 val jsonVersion: String by project
@@ -11,70 +11,41 @@ val modKitVersion: String by project
 group = "delta.cion.tokyo.modKit"
 version = modKitVersion
 
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
+kotlin {
+	jvmToolchain(21)
+	compilerOptions {
+		jvmTarget = JvmTarget.JVM_21
 	}
+}
+
+tasks.withType<JavaCompile>().configureEach {
+	options.release = 21
 }
 
 repositories {
 	mavenCentral()
+	gradlePluginPortal()
 	intellijPlatform {
 		defaultRepositories()
 	}
 }
 
 dependencies {
+	implementation("org.json:json:${jsonVersion}")
 	intellijPlatform {
-		intellijIdeaCommunity("2024.1.7")
+		intellijIdea("2025.2.6.2")
 		bundledPlugin("com.intellij.java")
-		bundledPlugin("org.jetbrains.plugins.gradle")
+		bundledPlugin("com.intellij.gradle")
 	}
-	implementation(kotlin("stdlib-jdk8"))
-	implementation("org.json:json:$jsonVersion")
 }
+
+// https://www.jetbrains.com/intellij-repository/releases/com/jetbrains/intellij/idea/ideaIU/2025.2.6.2/ideaIU-2025.2.6.2.pom
 
 intellijPlatform {
 	pluginConfiguration {
 		ideaVersion {
-			sinceBuild = "241"
+			sinceBuild = "252"
 			untilBuild = "999"
 		}
 	}
-}
-
-tasks {
-	jar {
-		dependsOn(shadowJar)
-		from(zipTree(shadowJar.get().archiveFile))
-		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-	}
-
-	withType<JavaCompile>().configureEach {
-		options.release = 21
-	}
-
-	shadowJar {
-		mergeServiceFiles()
-		archiveClassifier.set("")
-		dependencies {
-			include(dependency("org.json:json:.*"))
-		}
-	}
-
-	buildPlugin {
-		dependsOn(shadowJar)
-	}
-
-	build {
-		dependsOn(shadowJar)
-	}
-
-	named("prepareTestSandbox") {
-		dependsOn(shadowJar)
-	}
-}
-
-kotlin {
-	jvmToolchain(21)
 }
