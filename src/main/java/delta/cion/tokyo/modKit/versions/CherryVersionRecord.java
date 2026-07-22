@@ -1,4 +1,4 @@
-package delta.cion.cherry.modKit.versions;
+package delta.cion.tokyo.modKit.versions;
 
 public record CherryVersionRecord(
 	String version,

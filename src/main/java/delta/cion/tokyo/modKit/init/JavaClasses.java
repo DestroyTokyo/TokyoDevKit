@@ -1,4 +1,4 @@
-package delta.cion.cherry.modKit.init;
+package delta.cion.tokyo.modKit.init;
 
 public class JavaClasses {
 

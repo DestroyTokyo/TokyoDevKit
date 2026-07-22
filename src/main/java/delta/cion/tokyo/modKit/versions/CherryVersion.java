@@ -1,6 +1,6 @@
-package delta.cion.cherry.modKit.versions;
+package delta.cion.tokyo.modKit.versions;
 
-import delta.cion.cherry.modKit.util.Constants;
+import delta.cion.tokyo.modKit.util.Constants;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

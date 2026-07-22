@@ -1,15 +1,15 @@
-package delta.cion.cherry.modKit;
+package delta.cion.tokyo.modKit;
 
 import com.intellij.ide.util.projectWizard.WizardContext;
 import com.intellij.ide.wizard.*;
 
-import delta.cion.cherry.modKit.init.CherrySetup;
-import delta.cion.cherry.modKit.util.Constants;
+import delta.cion.tokyo.modKit.init.CherrySetup;
+import delta.cion.tokyo.modKit.util.Constants;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 
-public class CherryModKit implements GeneratorNewProjectWizard {
+public class TokyoDevKit implements GeneratorNewProjectWizard {
 
 	@Override
 	public @NotNull String getId() {
@@ -41,7 +41,7 @@ public class CherryModKit implements GeneratorNewProjectWizard {
 
 	public static class Builder extends GeneratorNewProjectWizardBuilderAdapter {
 		public Builder() {
-			super(new CherryModKit());
+			super(new TokyoDevKit());
 		}
 	}
 

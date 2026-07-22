@@ -1,4 +1,4 @@
-package delta.cion.cherry.modKit.versions;
+package delta.cion.tokyo.modKit.versions;
 
 import com.intellij.openapi.projectRoots.JavaSdk;
 import com.intellij.openapi.projectRoots.ProjectJdkTable;

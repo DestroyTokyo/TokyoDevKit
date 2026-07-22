@@ -1,4 +1,4 @@
-package delta.cion.cherry.modKit.util;
+package delta.cion.tokyo.modKit.util;
 
 import com.intellij.openapi.util.IconLoader;
 import org.gradle.util.GradleVersion;

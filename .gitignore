@@ -10,7 +10,6 @@
 .idea
 
 # <= Sometimes it appears =>
-./src/
 test/
 
 # <= Gradle =>
@@ -18,12 +17,11 @@ test/
 build
 gradlew
 gradlew.bat
+**.jar
 
 # <= Maven =>
 target/
 
 #   >> Contain
-gradle/wrapper/gradle-wrapper.jar
-
-# <= Contain =>
 !.intellijPlatform
+!gradle/wrapper/gradle-wrapper.properties

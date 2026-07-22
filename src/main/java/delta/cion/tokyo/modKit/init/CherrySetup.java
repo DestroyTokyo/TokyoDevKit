@@ -1,4 +1,4 @@
-package delta.cion.cherry.modKit.init;
+package delta.cion.tokyo.modKit.init;
 
 import com.intellij.ide.wizard.AbstractNewProjectWizardStep;
 import com.intellij.ide.wizard.NewProjectWizardStep;
@@ -16,8 +16,9 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.ui.dsl.builder.Panel;
 import com.intellij.ui.dsl.builder.Row;
 import com.intellij.ui.dsl.builder.RowLayout;
-import delta.cion.cherry.modKit.util.Constants;
-import delta.cion.cherry.modKit.versions.*;
+import delta.cion.tokyo.modKit.util.Constants;
+import delta.cion.tokyo.modKit.versions.*;
+import delta.cion.tokyo.modKit.versions.*;
 import kotlin.Unit;
 import org.jetbrains.plugins.gradle.util.GradleConstants;
 
