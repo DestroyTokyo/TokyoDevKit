@@ -66,10 +66,6 @@ dependencies {
 		bundledPlugin("com.intellij.java")
 		bundledPlugin("com.intellij.gradle")
 	}
-
-	pluginArtifact {
-		includeDependencies = true
-	}
 }
 
 // https://www.jetbrains.com/intellij-repository/releases/com/jetbrains/intellij/idea/ideaIU/2025.2.6.2/ideaIU-2025.2.6.2.pom
