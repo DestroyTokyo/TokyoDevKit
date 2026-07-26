@@ -193,18 +193,21 @@ private fun validateJavaPackageName(field: JTextField): ValidationInfo? = when {
 	else -> null
 }
 
-private fun validateSelectedVersion(field: JComboBox<String>, name: String, required: Boolean = true): ValidationInfo? = when {
-	!required -> null
-	version.isNullOrBlank() || version == VERSION_LIST_UNAVAILABLE ->
-		ValidationInfo("Could not load $name versions", field)
-	else -> null
+private fun validateSelectedVersion(field: JComboBox<String>, name: String, required: Boolean = true): ValidationInfo? {
+	val selected = field.selectedItem as? String
+	return when {
+		!required -> null
+		selected.isNullOrBlank() || selected == VERSION_LIST_UNAVAILABLE ->
+			ValidationInfo("Could not load $name versions", field)
+		else -> null
+	}
 }
 
 private fun currentGradleVersions(): List<String> {
 	return try {
-		val jsonString = HttpRequests.request(GRADLE_VERSIONS_URL)
-			.connect()
-			.readString()
+		val jsonString = HttpRequests.request(GRADLE_VERSIONS_URL).connect { request ->
+			request.readString()
+		}
 		val jsonArray = JSONArray(jsonString)
 		val versions = mutableListOf<String>()
 		for (i in 0 until jsonArray.length()) {
@@ -231,12 +234,14 @@ private fun currentGradleVersions(): List<String> {
 
 private fun loadTokyoEditionsMap(): Map<String, List<String>> {
 	return try {
-		val jsonString = HttpRequests.request(TOKYO_METADATA_URL)
-			.connect()
-			.readString()
+		val jsonString = HttpRequests.request(TOKYO_METADATA_URL).connect { request ->
+			request.readString()
+		}
 		val jsonObject = JSONObject(jsonString)
 		val map = mutableMapOf<String, List<String>>()
-		for (key in jsonObject.keys()) {
+		val keys = jsonObject.keys()
+		while (keys.hasNext()) {
+			val key = keys.next()
 			val versionsArray = jsonObject.getJSONArray(key)
 			val versions = (0 until versionsArray.length()).map { versionsArray.getString(it) }
 			val edition = key.substringAfterLast('/')
