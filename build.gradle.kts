@@ -8,7 +8,7 @@ plugins {
 val jsonVersion: String by project
 val modKitVersion: String by project
 
-group = "delta.cion.tokyo.modKit"
+group = "delta.cion.tokyo.devkit"
 version = modKitVersion
 
 kotlin {
