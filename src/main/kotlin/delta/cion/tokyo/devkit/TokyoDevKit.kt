@@ -82,7 +82,7 @@ private class TokyoSetupStep(parent: NewProjectWizardStep) : AbstractNewProjectW
 					.validationOnApply { validateEdition(it) }
 			}
 			row("Tokyo version") {
-				val initialVersions = editionsMap[editionProperty] ?: emptyList()
+				val initialVersions = editionsMap[selectedEdition] ?: emptyList()
 				comboBox(initialVersions)
 					.bindItem(versionProperty)
 					.applyToComponent { versionComboBox = this }
@@ -104,6 +104,12 @@ private class TokyoSetupStep(parent: NewProjectWizardStep) : AbstractNewProjectW
 					.validationOnInput { validateJavaPackageName(it) }
 					.validationOnApply { validateJavaPackageName(it) }
 			}
+		}
+		editionProperty.afterSet { newEdition ->
+			val versions = editionsMap[newEdition] ?: emptyList()
+			versionComboBox.model = DefaultComboBoxModel(versions.toTypedArray())
+			versionComboBox.selectedIndex = 0
+			versionProperty.set(versions.firstOrNull() ?: VERSION_LIST_UNAVAILABLE)
 		}
 	}
 
