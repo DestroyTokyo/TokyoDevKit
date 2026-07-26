@@ -35,6 +35,10 @@ import javax.swing.JComboBox
 import javax.swing.JTextField
 import kotlin.io.path.createDirectories
 
+import com.intellij.util.io.HttpRequests
+import com.intellij.openapi.diagnostic.Logger
+
+
 class TokyoDevKit : GeneratorNewProjectWizard {
 	override val id: String = "tokyo_dev_kit"
 	override val name: String = "TokyoDevKit"
@@ -166,7 +170,7 @@ private class TokyoSetupStep(parent: NewProjectWizardStep) : AbstractNewProjectW
 	private fun validateVersion(field: JComboBox<String>): ValidationInfo? {
 		val item = field.selectedItem as? String
 		return if (item == null || item == VERSION_LIST_UNAVAILABLE) {
-			ValidationInfo("Could not load versions for selected edition", field)
+			ValidationInfo("Could not load versions", field)
 		} else null
 	}
 }
@@ -189,22 +193,18 @@ private fun validateJavaPackageName(field: JTextField): ValidationInfo? = when {
 	else -> null
 }
 
-private fun validateSelectedVersion(field: JComboBox<String>, name: String, required: Boolean = true): ValidationInfo? {
-	val version = field.selectedItem as? String
-	return when {
-		!required -> null
-		version.isNullOrBlank() || version == VERSION_LIST_UNAVAILABLE ->
-			ValidationInfo("Could not load $name versions", field)
-		else -> null
-	}
+private fun validateSelectedVersion(field: JComboBox<String>, name: String, required: Boolean = true): ValidationInfo? = when {
+	!required -> null
+	version.isNullOrBlank() || version == VERSION_LIST_UNAVAILABLE ->
+		ValidationInfo("Could not load $name versions", field)
+	else -> null
 }
 
 private fun currentGradleVersions(): List<String> {
-	val jsonString = runCatching {
-		URI(GRADLE_VERSIONS_URL).toURL().readText()
-	}.getOrNull() ?: return listOf(VERSION_LIST_UNAVAILABLE)
-
-	return runCatching {
+	return try {
+		val jsonString = HttpRequests.request(GRADLE_VERSIONS_URL)
+			.connect()
+			.readString()
 		val jsonArray = JSONArray(jsonString)
 		val versions = mutableListOf<String>()
 		for (i in 0 until jsonArray.length()) {
@@ -222,16 +222,18 @@ private fun currentGradleVersions(): List<String> {
 				}
 			}
 		}
-		versions.distinct().sortedWith(compareByDescending { GradleVersion.version(it) })
-	}.getOrDefault(emptyList()).ifEmpty { listOf(VERSION_LIST_UNAVAILABLE) }
+		val result = versions.distinct().sortedWith(compareByDescending { GradleVersion.version(it) })
+		result
+	} catch (e: Exception) {
+		listOf(VERSION_LIST_UNAVAILABLE)
+	}
 }
 
 private fun loadTokyoEditionsMap(): Map<String, List<String>> {
-	val jsonString = runCatching {
-		URI(TOKYO_METADATA_URL).toURL().readText()
-	}.getOrNull() ?: return emptyMap()
-
-	return runCatching {
+	return try {
+		val jsonString = HttpRequests.request(TOKYO_METADATA_URL)
+			.connect()
+			.readString()
 		val jsonObject = JSONObject(jsonString)
 		val map = mutableMapOf<String, List<String>>()
 		for (key in jsonObject.keys()) {
@@ -241,7 +243,9 @@ private fun loadTokyoEditionsMap(): Map<String, List<String>> {
 			map[edition] = versions.asReversed().distinct()
 		}
 		map
-	}.getOrDefault(emptyMap())
+	} catch (e: Exception) {
+		emptyMap()
+	}
 }
 
 private fun currentMavenVersions(url: String, versionFilter: (String) -> Boolean = { true }): List<String> {
