@@ -26,6 +26,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URI
 import java.nio.file.Files
+import java.awt.event.ItemEvent
 import java.nio.file.Path
 import java.util.Locale
 import javax.swing.DefaultComboBoxModel
@@ -55,6 +56,8 @@ private class TokyoSetupStep(parent: NewProjectWizardStep) : AbstractNewProjectW
 	private val editionList: List<String> = editionsMap.keys.sorted()
 	private val firstEdition: String = editionList.firstOrNull() ?: VERSION_LIST_UNAVAILABLE
 
+	private lateinit var editionComboBox: JComboBox<String>
+
 	private val gradleVersions = currentGradleVersions()
 	private val shadowVersions = currentMavenVersions(SHADOW_PLUGIN_METADATA_URL) { STABLE_MAVEN_VERSION.matches(it) }
 
@@ -79,6 +82,7 @@ private class TokyoSetupStep(parent: NewProjectWizardStep) : AbstractNewProjectW
 			row("Tokyo edition") {
 				comboBox(editionList)
 					.bindItem(editionProperty)
+					.applyToComponent { editionComboBox = this }
 					.validationOnApply { validateEdition(it) }
 			}
 			row("Tokyo version") {
@@ -105,11 +109,14 @@ private class TokyoSetupStep(parent: NewProjectWizardStep) : AbstractNewProjectW
 					.validationOnApply { validateJavaPackageName(it) }
 			}
 		}
-		editionProperty.afterSet { newEdition ->
-			val versions = editionsMap[newEdition] ?: emptyList()
-			versionComboBox.model = DefaultComboBoxModel(versions.toTypedArray())
-			versionComboBox.selectedIndex = 0
-			versionProperty.set(versions.firstOrNull() ?: VERSION_LIST_UNAVAILABLE)
+		editionComboBox.addItemListener { event ->
+			if (event.stateChange == java.awt.event.ItemEvent.SELECTED) {
+				val newEdition = event.item as String
+				val versions = editionsMap[newEdition] ?: emptyList()
+				versionComboBox.model = DefaultComboBoxModel(versions.toTypedArray())
+				versionComboBox.selectedIndex = 0
+				versionProperty.set(versions.firstOrNull() ?: VERSION_LIST_UNAVAILABLE)
+			}
 		}
 	}
 
