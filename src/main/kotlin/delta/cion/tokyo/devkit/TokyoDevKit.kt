@@ -27,7 +27,6 @@ import org.json.JSONObject
 import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.StandardCopyOption
 import java.util.Locale
 import javax.swing.DefaultComboBoxModel
 import javax.swing.Icon
@@ -80,21 +79,10 @@ private class TokyoSetupStep(parent: NewProjectWizardStep) : AbstractNewProjectW
 			row("Tokyo edition") {
 				comboBox(editionList)
 					.bindItem(editionProperty)
-					.applyToComponent { comboBox ->
-						comboBox.addActionListener {
-							val newEdition = comboBox.selectedItem as? String ?: return@addActionListener
-							val versions = editionsMap[newEdition] ?: emptyList()
-							val model = DefaultComboBoxModel(versions.toTypedArray())
-							versionComboBox.model = model
-							val firstVersion = versions.firstOrNull() ?: VERSION_LIST_UNAVAILABLE
-							versionComboBox.selectedItem = firstVersion
-							versionProperty.set(firstVersion)
-						}
-					}
 					.validationOnApply { validateEdition(it) }
 			}
 			row("Tokyo version") {
-				val initialVersions = editionsMap[firstEdition] ?: emptyList()
+				val initialVersions = editionsMap[editionProperty] ?: emptyList()
 				comboBox(initialVersions)
 					.bindItem(versionProperty)
 					.applyToComponent { versionComboBox = this }
@@ -374,7 +362,7 @@ private fun mainJava(packageName: String, projectName: String) = """
 
 private fun pluginProperties(packageName: String, projectName: String) = """
     |main-class = $packageName.$projectName
-    |plugin-id = ${projectName.toLowerCase(Locale.ROOT)}
+    |plugin-id = ${projectName.lowercase()}
     |plugin-name = $projectName
     |
     |api-share = false

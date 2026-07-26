@@ -9,13 +9,13 @@
 .zed
 .idea
 .intellijPlatform
+*.zip
 
 # <= Gradle =>
 .gradle
 build
 gradlew
 gradlew.bat
-**.jar
 
 #   >> Contain
 !gradle/wrapper/gradle-wrapper.properties
