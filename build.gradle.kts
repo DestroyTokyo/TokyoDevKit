@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
 	id("org.jetbrains.kotlin.jvm") version "2.3.21"
 	id("org.jetbrains.intellij.platform") version "2.18.1"
+	id("com.gradleup.shadow") version "8.3.0"
 }
 
 val jsonVersion: String by project
@@ -18,8 +19,36 @@ kotlin {
 	}
 }
 
-tasks.withType<JavaCompile>().configureEach {
-	options.release = 21
+tasks {
+	jar {
+		dependsOn(shadowJar)
+		from(zipTree(shadowJar.get().archiveFile))
+		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	}
+
+	withType<JavaCompile>().configureEach {
+		options.release = 21
+	}
+
+	shadowJar {
+		mergeServiceFiles()
+		archiveClassifier.set("")
+		dependencies {
+			include(dependency("org.json:json:.*"))
+		}
+	}
+
+	buildPlugin {
+		dependsOn(shadowJar)
+	}
+
+	build {
+		dependsOn(shadowJar)
+	}
+
+	named("prepareTestSandbox") {
+		dependsOn(shadowJar)
+	}
 }
 
 repositories {
