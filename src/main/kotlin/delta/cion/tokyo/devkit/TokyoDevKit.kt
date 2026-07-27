@@ -296,37 +296,42 @@ private fun settingsGradle(projectName: String): String {
 
 private fun buildGradle(packageName: String, edition: String, tokyoVersion: String, shadowVersion: String): String {
 	return """
-        plugins {
-			java
-            id("com.gradleup.shadow") version "$shadowVersion"
+    plugins {
+		java
+        id("com.gradleup.shadow") version "$shadowVersion"
+    }
+
+    group = "${packageName.escapeKotlinString()}"
+
+    repositories {
+        mavenCentral()
+        maven("https://tokyo.citory.net/")
+    }
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+
+    dependencies {
+        compileOnly("delta.cion.tokyo:$edition:$tokyoVersion")
+    }
+
+    tasks {
+        build {
+            dependsOn(shadowJar)
         }
 
-        group = "${packageName.escapeKotlinString()}"
-
-        repositories {
-            mavenCentral()
-            maven("https://tokyo.citory.net/")
+		shadowJar {
+        	mergeServiceFiles()
+        	archiveClassifier.set("")
         }
 
-        java {
-            toolchain {
-                languageVersion = JavaLanguageVersion.of(21)
-            }
+        withType<JavaCompile> {
+     		options.encoding = "UTF-8"
         }
-
-        dependencies {
-            compileOnly("delta.cion.tokyo:$edition:$tokyoVersion")
-        }
-
-        tasks {
-            build {
-                dependsOn(tasks.shadowJar)
-            }
-
-            withType<JavaCompile> {
-                options.encoding = "UTF-8"
-            }
-        }
+    }
     """.trimIndent()
 }
 
