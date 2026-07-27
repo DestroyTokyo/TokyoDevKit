@@ -320,7 +320,7 @@ private fun buildGradle(packageName: String, edition: String, tokyoVersion: Stri
 
         tasks {
             build {
-                dependsOn(shadowJar)
+                dependsOn(tasks.shadowJar)
             }
 
             withType<JavaCompile> {
