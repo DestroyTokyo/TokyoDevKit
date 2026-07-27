@@ -296,8 +296,8 @@ private fun settingsGradle(projectName: String): String {
 
 private fun buildGradle(packageName: String, edition: String, tokyoVersion: String, shadowVersion: String): String {
 	return """
-    plugins {
-		java
+	plugins {
+	    java
         id("com.gradleup.shadow") version "$shadowVersion"
     }
 
