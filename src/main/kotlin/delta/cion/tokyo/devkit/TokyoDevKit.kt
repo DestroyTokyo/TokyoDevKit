@@ -79,8 +79,6 @@ private class TokyoSetupStep(parent: NewProjectWizardStep) : AbstractNewProjectW
 
 	private lateinit var versionComboBox: JComboBox<String>
 
-	private val projectName = parent.context.projectName
-
 	override fun setupUI(builder: Panel) {
 		builder.group("Tokyo plugin setup") {
 			row("Tokyo edition") {
@@ -125,6 +123,9 @@ private class TokyoSetupStep(parent: NewProjectWizardStep) : AbstractNewProjectW
 	}
 
 	override fun setupProject(project: Project) {
+
+		val projectName = context.projectName ?: error("Project name is not set")
+
 		val base = baseData ?: error("Project base data is unavailable")
 		val root = Path.of(base.contentEntryPath)
 		val packageName = packageNameProperty.get().trim()
