@@ -142,7 +142,7 @@ private class TokyoSetupStep(parent: NewProjectWizardStep) : AbstractNewProjectW
 		writeText(root.resolve("gradle.properties"), gradleProperties())
 		writeText(root.resolve("gradle/wrapper/gradle-wrapper.properties"), wrapperProperties(gradleVersionProperty.get()))
 		writeText(root.resolve(".gitignore"), gitIgnore())
-		writeText(root.resolve("src/main/java/$packagePath/Main.java"), mainJava(packageName, projectName))
+		writeText(root.resolve("src/main/java/$packagePath/$projectName.java"), mainJava(packageName, projectName))
 		writeText(root.resolve("src/main/resources/plugin.properties"), pluginProperties(packageName, projectName))
 
 		LocalFileSystem.getInstance()
@@ -296,99 +296,99 @@ private fun settingsGradle(projectName: String): String {
 
 private fun buildGradle(packageName: String, edition: String, tokyoVersion: String, shadowVersion: String): String {
 	return """
-    |plugins {
-    |    id("com.gradleup.shadow") version "$shadowVersion"
-    |}
-    |
-    |group = "${packageName.escapeKotlinString()}"
-    |
-    |repositories {
-    |    maven("https://tokyo.citory.net/")
-    |    mavenCentral()
-    |}
-    |
-    |java {
-    |    toolchain {
-    |        languageVersion = JavaLanguageVersion.of(21)
-    |    }
-    |}
-    |
-    |dependencies {
-    |    compileOnly("delta.cion.tokyo:$edition:$tokyoVersion")
-    |}
-    |
-    |tasks {
-    |    build {
-    |        dependsOn(shadowJar)
-    |    }
-    |
-    |    withType<JavaCompile> {
-    |        options.encoding = "UTF-8"
-    |    }
-    |}
+    plugins {
+        id("com.gradleup.shadow") version "$shadowVersion"
+    }
+
+    group = "${packageName.escapeKotlinString()}"
+
+    repositories {
+        mavenCentral()
+        maven("https://tokyo.citory.net/")
+    }
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+
+    dependencies {
+        compileOnly("delta.cion.tokyo:$edition:$tokyoVersion")
+    }
+
+    tasks {
+        build {
+            dependsOn(shadowJar)
+        }
+
+        withType<JavaCompile> {
+            options.encoding = "UTF-8"
+        }
+    }
     """.trimMargin()
 }
 
 private fun gradleProperties() = """
-    |org.gradle.parallel=true
-    |org.gradle.caching=false
-    |
-    |org.gradle.jvmargs=-Xmx4G
-    |org.gradle.experimental.watching=false
-    """.trimIndent() + "\n"
+	org.gradle.parallel=true
+    org.gradle.caching=false
+
+    org.gradle.jvmargs=-Xmx4G
+    org.gradle.experimental.watching=false
+	""".trimIndent() + "\n"
 
 private fun wrapperProperties(version: String) = """
-    |distributionBase=GRADLE_USER_HOME
-    |distributionPath=wrapper/dists
-    |distributionUrl=https\://services.gradle.org/distributions/gradle-$version-bin.zip
-    |networkTimeout=10000
-    |validateDistributionUrl=true
-    |zipStoreBase=GRADLE_USER_HOME
-    |zipStorePath=wrapper/dists
+    distributionBase=GRADLE_USER_HOME
+    distributionPath=wrapper/dists
+    distributionUrl=https\://services.gradle.org/distributions/gradle-$version-bin.zip
+    networkTimeout=10000
+    validateDistributionUrl=true
+    zipStoreBase=GRADLE_USER_HOME
+    zipStorePath=wrapper/dists
     """.trimIndent() + "\n"
 
 private fun gitIgnore() = """
-    |# ==================== #
-    |# By: Lmao stupid Cion #
-    |# ==================== #
-    |
-    |# <= Main =>
-    |.env
-    |*.iml
-    |*.iws
-    |.zed
-    |.idea
-    |
-    |
-    |# <= Gradle =>
-    |.gradle
-    |build
-    |gradlew
-    |gradlew.bat
-    |
-    |#   >> Contain
-    |!.gitattributes
+    # ==================== #
+    # By: Lmao stupid Cion #
+    # ==================== #
+
+    # <= Main =>
+    .env
+    *.iml
+    *.iws
+    .zed
+    .idea
+
+
+    # <= Gradle =>
+    .gradle
+    build
+    gradlew
+    gradlew.bat
+
+    #   >> Contain
+    !.gitattributes
     """.trimIndent() + "\n"
 
 private fun mainJava(packageName: String, projectName: String) = """
-    |package $packageName;
-    |
-    |import delta.cion.tokyo.api.plugin.Plugin;
-    |
-    |public class $projectName extends Plugin {
-    |
-    |    public $projectName(String id, String name, String version) {
-    |        super(id, name, version);
-    |    }
-    |
-    |}""".trimIndent() + "\n"
+    package $packageName;
+
+    import delta.cion.tokyo.api.plugin.Plugin;
+
+    public class $projectName extends Plugin {
+
+        public $projectName(String id, String name, String version) {
+            super(id, name, version);
+        }
+
+    }""".trimIndent() + "\n"
 
 private fun pluginProperties(packageName: String, projectName: String) = """
-    |main-class = $packageName.$projectName
-    |plugin-id = ${projectName.lowercase()}
-    |plugin-name = $projectName
-    |
-    |api-share = false
+    main-class = $packageName.$projectName
+    plugin-id = ${projectName.lowercase()}
+    plugin-name = $projectName
+
+    api-share = false
     """.trimIndent() + "\n"
 
 private fun String.escapeKotlinString(): String =
