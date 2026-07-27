@@ -5,7 +5,7 @@
 ---
 
 ```txt
-TokyoMidKit - Its a IntellijIDEA plugin for develop Tokyo server.
+TokyoDevKit - Its a IntellijIDEA plugin for develop Tokyo server.
 
 URLS:
 main maven repo: https://tokyo.citory.net/
@@ -20,7 +20,7 @@ Tokyo (Server): https://github.com/DestroyTokyo/Tokyo
 ```txt
 For developers:
 
-Native IDEA version: 2024.1.7
+Native IDEA version: 2025.2.6.2
 Java: 21
 Gradle: 9.4.1
 
