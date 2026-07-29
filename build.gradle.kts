@@ -13,7 +13,7 @@ group = "delta.cion.tokyo.devkit"
 version = modKitVersion
 
 kotlin {
-	jvmToolchain(21)
+	jvmToolchain(25)
 	compilerOptions {
 		jvmTarget = JvmTarget.JVM_25
 	}
