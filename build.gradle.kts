@@ -15,7 +15,7 @@ version = modKitVersion
 kotlin {
 	jvmToolchain(21)
 	compilerOptions {
-		jvmTarget = JvmTarget.JVM_21
+		jvmTarget = JvmTarget.JVM_25
 	}
 }
 
@@ -27,7 +27,7 @@ tasks {
 	}
 
 	withType<JavaCompile>().configureEach {
-		options.release = 21
+		options.release = 25
 	}
 
 	shadowJar {

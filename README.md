@@ -21,8 +21,8 @@ Tokyo (Server): https://github.com/DestroyTokyo/Tokyo
 For developers:
 
 Native IDEA version: 2025.2.6.2
-Java: 21
-Gradle: 9.4.1
+Java: 25
+Gradle: 9.6.1
 
 Another versions u can see in gradle.properties
 Just dont use libs.toml please.

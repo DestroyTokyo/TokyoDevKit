@@ -181,11 +181,11 @@ private const val TOKYO_METADATA_URL = "https://tokyo.citory.net/jsons/versions.
 private const val SHADOW_PLUGIN_METADATA_URL =
 	"https://plugins.gradle.org/m2/com/gradleup/shadow/com.gradleup.shadow.gradle.plugin/maven-metadata.xml"
 private const val VERSION_LIST_UNAVAILABLE = "Version list unavailable"
-private val MIN_GRADLE_VERSION: GradleVersion = GradleVersion.version("8.5")
+private val MIN_GRADLE_VERSION: GradleVersion = GradleVersion.version("9.6.1")
 private val STABLE_GRADLE_VERSION = Regex("""\d+\.\d+(?:\.\d+)?""")
 private val STABLE_MAVEN_VERSION = Regex("""\d+\.\d+\.\d+""")
 private val MAVEN_METADATA_VERSION = Regex("""<version>([^<]+)</version>""")
-private val JAVA_21_VERSION = Regex("""(?:^|\D)21(?:\D|$)""")
+private val JAVA_VERSION = Regex("""(?:^|\D)25(?:\D|$)""")
 private val JAVA_PACKAGE_NAME = Regex("""[A-Za-z_$][A-Za-z\d_$]*(\.[A-Za-z_$][A-Za-z\d_$]*)*""")
 
 private fun validateJavaPackageName(field: JTextField): ValidationInfo? = when {
@@ -272,7 +272,7 @@ private fun writeText(path: Path, content: String) {
 }
 
 private fun setProjectSdk(project: Project) {
-	val sdk = configuredJava21Sdk() ?: return
+	val sdk = configuredJavaSdk() ?: return
 	val application = ApplicationManager.getApplication()
 	application.invokeLater {
 		if (!project.isDisposed) {
@@ -283,10 +283,10 @@ private fun setProjectSdk(project: Project) {
 	}
 }
 
-private fun configuredJava21Sdk(): Sdk? {
+private fun configuredJavaSdk(): Sdk? {
 	val javaSdk = JavaSdk.getInstance()
 	return ProjectJdkTable.getInstance().allJdks.firstOrNull { sdk ->
-		sdk.sdkType == javaSdk && JAVA_21_VERSION.containsMatchIn(sdk.versionString.orEmpty())
+		sdk.sdkType == javaSdk && JAVA_VERSION.containsMatchIn(sdk.versionString.orEmpty())
 	}
 }
 
@@ -310,7 +310,7 @@ private fun buildGradle(packageName: String, edition: String, tokyoVersion: Stri
 
     java {
         toolchain {
-            languageVersion = JavaLanguageVersion.of(21)
+            languageVersion = JavaLanguageVersion.of(25)
         }
     }
 
