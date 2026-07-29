@@ -13,9 +13,9 @@ group = "delta.cion.tokyo.devkit"
 version = modKitVersion
 
 kotlin {
-	jvmToolchain(25)
+	jvmToolchain(21)
 	compilerOptions {
-		jvmTarget = JvmTarget.JVM_25
+		jvmTarget = JvmTarget.JVM_21
 	}
 }
 
@@ -27,7 +27,7 @@ tasks {
 	}
 
 	withType<JavaCompile>().configureEach {
-		options.release = 25
+		options.release = 21
 	}
 
 	shadowJar {
